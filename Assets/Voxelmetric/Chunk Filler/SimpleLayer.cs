@@ -14,16 +14,11 @@ public class SimpleLayer : TerrainLayer {
 
     public override int ApplyLayerCol(int x, int z, int head)
     {
-        int add = Noise(x, z, offset, frequency, amplitude) ;
+        int add = Noise(x, z, offset, frequency, amplitude) + baseHeight;
 
         int top = add;
         if (!absolute) top += head;
-
-        if (absolute)
-        {
-            if (head > add)
-                return head;
-        }
+        if (absolute && head > add) return head;
 
         Utils.ProfileCall(() =>
         {
