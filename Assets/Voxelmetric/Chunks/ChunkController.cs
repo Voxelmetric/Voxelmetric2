@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System;
 
-public class ChunkController : MonoBehaviour {
+public abstract class ChunkController : MonoBehaviour {
 
     internal Voxelmetric vm;
 
@@ -26,27 +27,21 @@ public class ChunkController : MonoBehaviour {
         blockSize = _blockSize;
     }
 
-    public void Destroy(Pos chunkPos)
+    public virtual void Destroy(Pos chunkPos)
     {
-        BaseChunk chunk = GetChunk(chunkPos);
+        Chunk chunk = GetChunk(chunkPos);
         if (chunk != null) Destroy(chunk);
     }
 
-    public virtual void Destroy(BaseChunk chunk) { }
+    public abstract void Destroy(Chunk chunk);
 
-    public virtual BaseChunk GetChunk(Pos chunkPos)
-    {
-        return null;
-    }
+    public abstract Chunk GetChunk(Pos chunkPos);
 
-    public virtual Block GetBlock(Pos blockPos)
-    {
-        return new Block();
-    }
+    public abstract Block GetBlock(Pos blockPos);
 
     public virtual void SetBlock(Pos blockPos, Block block)
     {
-        BaseChunk chunk = GetChunk(blockPos);
+        Chunk chunk = GetChunk(blockPos);
 
         if (chunk != null)
         {
@@ -54,21 +49,19 @@ public class ChunkController : MonoBehaviour {
         }
     }
 
-    public virtual BaseChunk CreateChunk(Pos pos)
+    public virtual Chunk CreateChunk(Pos pos)
     {
-        return null;
-    }
+        pos = GetChunkPos(pos);
+        Chunk chunk;
 
-    public virtual void SafePlaceBlock(Pos blockPos, Block block)
-    {
-        BaseChunk chunk = GetChunk(blockPos);
+        GameObject chunkGO = new GameObject("Chunk at " + pos, new Type[] {
+            vm.components.chunkType.GetType()
+        });
 
-        if (chunk == null)
-        {
-            chunk = CreateChunk(blockPos);
-        }
+        chunk = chunkGO.GetComponent<Chunk>();
+        chunk.VmStart(pos, this);
 
-        chunk.SetBlock(block, blockPos);
+        return chunk;
     }
 
     public virtual Pos GetBlockPos(Vector3 point)
@@ -93,9 +86,9 @@ public class ChunkController : MonoBehaviour {
                                (blockPos.z >> chunkPower) << chunkPower);
     }
 
-    public virtual List<BaseChunk> GetChunks()
+    public virtual List<Chunk> GetChunks()
     {
-        return new List<BaseChunk>();
+        return new List<Chunk>();
     }
 
     public virtual byte[] Serialize(byte storeMode)

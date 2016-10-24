@@ -16,7 +16,7 @@ public class TextureSet
         textures.Add(texture);
     }
 
-    public virtual Rect GetTexture(BaseChunk chunk, Pos blockPos, Direction direction)
+    public virtual Rect GetTexture(Chunk chunk, Pos blockPos, Direction direction)
     {
         if (textures.Count == 0)
         {

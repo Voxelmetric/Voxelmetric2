@@ -20,9 +20,9 @@ public class Voxelmetric : MonoBehaviour {
     {
         public ChunkController chunks;
         public BlockTypeLoader blockLoader;
-        public BaseChunkFiller chunkFiller;
+        public ChunkFiller chunkFiller;
         public TextureSetLoader textureLoader;
-        public BaseChunk chunkType;
+        public Chunk chunkType;
     }
 
     private Components _components;
@@ -56,15 +56,13 @@ public class Voxelmetric : MonoBehaviour {
         _components.chunks = GetComponent<ChunkController>();
         _components.textureLoader = GetComponent<TextureSetLoader>();
         _components.blockLoader = GetComponent<BlockTypeLoader>();
-        _components.chunkFiller = GetComponent<BaseChunkFiller>();
-        _components.chunkType = GetComponent<BaseChunk>();
+        _components.chunkFiller = GetComponent<ChunkFiller>();
+        _components.chunkType = GetComponent<Chunk>();
 
         _components.chunks.Initialize(this);
         _components.textureLoader.LoadTextures(this);
         _components.blockLoader.LoadBlocks(this);
         _components.chunkFiller.Initialize(this);
-
-
     }
 
     void Start()

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Chunk3d : BaseChunk {
+public class CubeChunk : Chunk {
 
     public Block[,,] blocks;
 
@@ -63,9 +63,15 @@ public class Chunk3d : BaseChunk {
     public override void Render()
     {
         CreateChunkMesh(meshData);
-        AssignMesh(meshData);
+        Utils.ProfileCall(() =>
+        {
+            AssignMesh(meshData);
+        }, "Assign mesh");
 
-        meshData.Clear();
+        Utils.ProfileCall(() =>
+        {
+            meshData.Clear();
+        }, "Clear mesh");
     }
 
     /// <summary>
@@ -74,32 +80,34 @@ public class Chunk3d : BaseChunk {
     /// </summary>
     protected override void CreateChunkMesh(MeshData meshData)
     {
-        Profiler.BeginSample("Create neighbors");
-        if (!rendered)
+        Utils.ProfileCall(() =>
         {
-            // Fist time this chunk is rendered - make sure that all neighboring
-            // chunks are filled before this chunk can be rendered
-            foreach (var dir in DirectionUtils.Directions)
+            if (!rendered)
             {
-                chunkController.CreateChunk(pos + (chunkController.chunkSize * (Pos)dir));
-            }
-
-            rendered = true;
-        }
-        Profiler.EndSample();
-
-        Profiler.BeginSample("Fill meshData");
-        for (int x = 0; x < blocks.GetLength(0); x++)
-        {
-            for (int y = 0; y < blocks.GetLength(1); y++)
-            {
-                for (int z = 0; z < blocks.GetLength(2); z++)
+                // Fist time this chunk is rendered - make sure that all neighboring
+                // chunks are filled before this chunk can be rendered
+                foreach (var dir in DirectionUtils.Directions)
                 {
-                    blocks[x, y, z].GetBlockType(chunkController.vm).Render(this, new Pos(x, y, z) + pos, blocks[x, y, z], ref meshData);
+                    chunkController.CreateChunk(pos + (chunkController.chunkSize * (Pos)dir));
+                }
+
+                rendered = true;
+            }
+        }, "Create neighbors");
+
+        Utils.ProfileCall(() =>
+        {
+            for (int x = 0; x < blocks.GetLength(0); x++)
+            {
+                for (int y = 0; y < blocks.GetLength(1); y++)
+                {
+                    for (int z = 0; z < blocks.GetLength(2); z++)
+                    {
+                        blocks[x, y, z].GetBlockType(chunkController.vm).Render(this, new Pos(x, y, z) + pos, blocks[x, y, z], ref meshData);
+                    }
                 }
             }
-        }
-        Profiler.EndSample();
+        }, "Fill mesh data");
     }
 
     /// <summary>
@@ -108,6 +116,7 @@ public class Chunk3d : BaseChunk {
     protected override void AssignMesh(MeshData meshData)
     {
         Mesh mesh = new Mesh();
+        mesh.name = "Mesh for " + name;
         mesh.vertices = meshData.verts.ToArray();
         mesh.triangles = meshData.tris.ToArray();
         mesh.uv = meshData.uvs.ToArray();
@@ -115,8 +124,11 @@ public class Chunk3d : BaseChunk {
         filter.mesh = mesh;
 
         mesh = new Mesh();
-        mesh.vertices = meshData.colVerts.ToArray();
-        mesh.triangles = meshData.colTris.ToArray();
+        mesh.name = "Collision mesh for " + name;
+        //mesh.vertices = meshData.colVerts.ToArray();
+        //mesh.triangles = meshData.colTris.ToArray();
+        mesh.vertices = meshData.verts.ToArray();
+        mesh.triangles = meshData.tris.ToArray();
 
         col.sharedMesh = mesh;
 

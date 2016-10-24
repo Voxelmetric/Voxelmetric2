@@ -25,8 +25,10 @@ public class SimpleLayer : TerrainLayer {
                 return head;
         }
 
-        filler.SetBlocks(x, z, head, top, new Block(blockId));
-
+        Utils.ProfileCall(() =>
+        {
+            filler.SetBlocks(x, z, head, top, new Block(blockId));
+        }, "Set Blocks");
         return top;
     }
 }

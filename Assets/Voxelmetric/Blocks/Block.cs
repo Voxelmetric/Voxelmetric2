@@ -8,10 +8,12 @@ public struct Block {
     {
         this.id = (ushort)id;
         data = new byte[8];
+        textureSet = null;
     }
 
     public ushort id;
     public byte[] data;
+    public TextureSet textureSet;
 
     /// <summary>
     /// Used to access the block's attributes.

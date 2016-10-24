@@ -3,10 +3,12 @@ using UnityEngine;
 
 public class Utils {
 
-    public static void ProfileCall(ThreadStart threadStart, string profilerName)
+    public static void ProfileCall(ThreadStart threadStart, string sampleName)
     {
-        Profiler.BeginSample(profilerName);
+        Profiler.BeginSample(sampleName);
         threadStart.DynamicInvoke();
         Profiler.EndSample();
     }
 }
+
+

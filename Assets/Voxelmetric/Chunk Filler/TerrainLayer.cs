@@ -4,10 +4,10 @@ using SimplexNoise;
 
 public class TerrainLayer {
 
-    protected BaseChunkFiller filler;
+    protected ChunkFiller filler;
     protected Noise noise;
 
-    public virtual void VmStart(BaseChunkFiller chunkFiller)
+    public virtual void VmStart(ChunkFiller chunkFiller)
     {
         filler = chunkFiller;
         noise = chunkFiller.noise;

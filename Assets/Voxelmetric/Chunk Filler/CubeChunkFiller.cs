@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using SimplexNoise;
 
-public class ChunkFiller3d : BaseChunkFiller {
+public class CubeChunkFiller : ChunkFiller {
 
     public string seed;
 
@@ -22,14 +22,13 @@ public class ChunkFiller3d : BaseChunkFiller {
                 absolute = true,
                 blockId = vm.components.blockLoader.GetId("rock")
             },
-            //new SimpleLayer() {
-            //    baseHeight = 30,
-            //    frequency = 0.1f,
-            //    amplitude = 4,
-            //    absolute = true,
-            //    offset = 10000,
-            //    blockId = vm.components.blockLoader.GetId("stone")
-            //}
+            new SimpleLayer() {
+                baseHeight = 1,
+                frequency = 0.1f,
+                amplitude = 2,
+                absolute = false,
+                blockId = vm.components.blockLoader.GetId("dirt")
+            }
         };
 
         Utils.ProfileCall(() =>
@@ -39,12 +38,12 @@ public class ChunkFiller3d : BaseChunkFiller {
         }, "Initialize layers");
     }
 
-    public override void FillChunk(BaseChunk chunk)
+    public override void FillChunk(Chunk chunk)
     {
         if (chunkSize == 0) chunkSize = chunk.chunkSize;
 
         Pos pos = chunk.pos;
-        var chunk3d = (Chunk3d)chunk;
+        var chunk3d = (CubeChunk)chunk;
 
         Block[,,] storedValuesForChunk;
         if (stored.TryGetValue(pos, out storedValuesForChunk))

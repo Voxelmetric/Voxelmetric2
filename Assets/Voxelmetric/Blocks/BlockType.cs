@@ -19,31 +19,31 @@ public class BlockType
         this.vm = vm;
     }
 
-    public virtual string GetName(BaseChunk chunk, Pos pos, Block block)
+    public virtual string GetName(Chunk chunk, Pos pos, Block block)
     {
         return blockName;
     }
 
-    public void Render(BaseChunk chunk, Pos pos, Block block, ref MeshData meshData)
+    public void Render(Chunk chunk, Pos pos, Block block, ref MeshData meshData)
     {
         PreRender(chunk, pos, block);
         AddMeshData(chunk, pos, block, ref meshData);
         PostRender(chunk, pos, block);
     }
 
-    public virtual Block OnCreate(BaseChunk chunk, Pos pos, Block block)
+    public virtual Block OnCreate(Chunk chunk, Pos pos, Block block)
     {
         return block;
     }
 
-    public virtual void OnDestroy(BaseChunk chunk, Pos pos, Block block, int destroyer) { }
-    public virtual void RandomUpdate(BaseChunk chunk, Pos pos, Block block) { }
+    public virtual void OnDestroy(Chunk chunk, Pos pos, Block block, int destroyer) { }
+    public virtual void RandomUpdate(Chunk chunk, Pos pos, Block block) { }
 
-    protected virtual void PreRender(BaseChunk chunk, Pos pos, Block block) { }
-    protected virtual void AddMeshData(BaseChunk chunk, Pos pos, Block block, ref MeshData meshData) { }
-    protected virtual void PostRender(BaseChunk chunk, Pos pos, Block block) { }
+    protected virtual void PreRender(Chunk chunk, Pos pos, Block block) { }
+    protected virtual void AddMeshData(Chunk chunk, Pos pos, Block block, ref MeshData meshData) { }
+    protected virtual void PostRender(Chunk chunk, Pos pos, Block block) { }
 
-    public virtual bool IsSolid(BaseChunk chunk, Pos pos, Block block, Direction direction)
+    public virtual bool IsSolid(Chunk chunk, Pos pos, Block block, Direction direction)
     {
         return solid;
     }

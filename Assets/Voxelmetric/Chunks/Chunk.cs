@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 // TODO: need to implement logic around reloading mesh and initial mesh load
 
-public class BaseChunk : MonoBehaviour {
+public class Chunk : MonoBehaviour {
 
     public Pos pos;
     [HideInInspector]

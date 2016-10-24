@@ -12,7 +12,7 @@ public class CubeBlockType : BlockType {
         textureSet = vm.components.textureLoader.GetByName(textureName);
     }
 
-    protected override void AddMeshData(BaseChunk chunk, Pos pos, Block block, ref MeshData meshData)
+    protected override void AddMeshData(Chunk chunk, Pos pos, Block block, ref MeshData meshData)
     {
         foreach (var dir in DirectionUtils.Directions)
         {

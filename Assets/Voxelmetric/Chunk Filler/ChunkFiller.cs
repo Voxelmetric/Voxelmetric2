@@ -2,7 +2,7 @@
 using System.Collections;
 using SimplexNoise;
 
-public class BaseChunkFiller : MonoBehaviour {
+public class ChunkFiller : MonoBehaviour {
 
     public Noise noise;
     protected Voxelmetric vm;
@@ -13,7 +13,7 @@ public class BaseChunkFiller : MonoBehaviour {
         this.vm = vm;
     }
 
-    public virtual void FillChunk(BaseChunk chunk)
+    public virtual void FillChunk(Chunk chunk)
     {
         chunk.chunkIsFilled = true;
     }

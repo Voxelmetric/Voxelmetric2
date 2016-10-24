@@ -32,14 +32,14 @@ public class VoxelmetricRouter: NetworkBehaviour {
     [ClientRpc]
     public void RpcSetBlock(int x, int y, int z, int blockId)
     {
-        vm.components.chunks.SafePlaceBlock(new Pos(x, y, z), new Block(blockId));
+        vm.components.chunks.SetBlock(new Pos(x, y, z), new Block(blockId));
     }
 
     [Command]
     public void CmdSetBlock(int x, int y, int z, int blockId)
     {
         // TODO: Add checks and validation here
-        vm.components.chunks.SafePlaceBlock(new Pos(x, y, z), new Block(blockId));
+        vm.components.chunks.SetBlock(new Pos(x, y, z), new Block(blockId));
         //RpcSetBlock(x, y, z, blockId);
     }
     /// Block commands
