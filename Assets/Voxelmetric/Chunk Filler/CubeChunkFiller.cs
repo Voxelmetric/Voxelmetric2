@@ -16,19 +16,33 @@ public class CubeChunkFiller : ChunkFiller {
         noise = new Noise(seed);
         layers = new TerrainLayer[] {
             new SimpleLayer() {
-                baseHeight = 30,
+                baseHeight = 20,
                 frequency = 0.01f,
-                amplitude = 4,
+                amplitude = 16,
                 absolute = true,
                 blockId = vm.components.blockLoader.GetId("rock")
             },
             new SimpleLayer() {
-                baseHeight = 1,
+                baseHeight = 0,
                 frequency = 0.1f,
+                amplitude = 6,
+                absolute = false,
+                blockId = vm.components.blockLoader.GetId("rock")
+            },
+            new SimpleLayer() {
+                baseHeight = 20,
+                frequency = 0.05f,
+                amplitude = 2,
+                absolute = true,
+                blockId = vm.components.blockLoader.GetId("dirt")
+            },
+            new SimpleLayer() {
+                baseHeight = 2,
+                frequency = 0.01f,
                 amplitude = 2,
                 absolute = false,
-                blockId = vm.components.blockLoader.GetId("dirt")
-            }
+                blockId = vm.components.blockLoader.GetId("grass")
+            },
         };
 
         Utils.ProfileCall(() =>
