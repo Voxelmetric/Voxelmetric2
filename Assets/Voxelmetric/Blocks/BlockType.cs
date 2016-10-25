@@ -24,7 +24,7 @@ public class BlockType
         return blockName;
     }
 
-    public void Render(Chunk chunk, Pos pos, Block block, ref MeshData meshData)
+    public void Render(Chunk chunk, Pos pos, Block block, MeshData meshData)
     {
         PreRender(chunk, pos, block);
         AddMeshData(chunk, pos, block, ref meshData);
