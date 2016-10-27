@@ -31,6 +31,9 @@ public class LoadChunks : MonoBehaviour
     public bool RenderChunksInSeparateFrame = true;
     List<Pos> chunksToRender = new List<Pos>();
 
+    public int minChunkY = -32;
+    public int maxChunkY = 32;
+
     int deleteTimer = 0;
     List<Pos> chunksToGenerate = new List<Pos>();
     int chunkSize;
@@ -129,13 +132,13 @@ public class LoadChunks : MonoBehaviour
 
     bool FindChunksAndLoad()
     {
-        //Cycle through the array of positions
+        // Cycle through the array of positions
         for (int i = 0; i < chunkPositions.Length; i++)
         {
-            //Get the position of this gameobject to generate around
+            // Get the position of this gameobject to generate around
             Pos playerPos = chunks.GetChunkPos(transform.position);
 
-            //translate the player position and array position into chunk position
+            // translate the player position and array position into chunk position
             Pos newChunkPos = new Pos(
                 chunkPositions[i].x * chunkSize + playerPos.x,
                 0,
@@ -145,25 +148,23 @@ public class LoadChunks : MonoBehaviour
             if (chunksToGenerate.Contains(newChunkPos) || chunksToRender.Contains(newChunkPos))
                 continue;
 
-            //Get the chunk in the defined position
+            // Get the chunk in the defined position
             Chunk newChunk = chunks.GetChunk(newChunkPos);
 
-            //If the chunk already exists and it's already
-            //rendered or in queue to be rendered continue
-            if (newChunk != null)
+            // If the chunk already exists and it's already
+            // rendered or in queue to be rendered continue
+            if (newChunk == null)
             {
-                if (newChunk.rendered) continue;
-
-                for (int y = -32; y <= 32; y += chunkSize)
-                    chunksToRender.Add(new Pos(newChunkPos.x, y, newChunkPos.z));
-
+                for (int y = minChunkY; y <= maxChunkY; y += chunkSize)
+                    chunksToGenerate.Add(new Pos(newChunkPos.x, y, newChunkPos.z));
                 return true;
             }
-
-            for (int y = -32; y <= 32; y += chunkSize)
-                chunksToGenerate.Add(new Pos(newChunkPos.x, y, newChunkPos.z));
-
-            return true;
+            else if (!newChunk.rendered)
+            {
+                for (int y = minChunkY; y <= maxChunkY; y += chunkSize)
+                    chunksToRender.Add(new Pos(newChunkPos.x, y, newChunkPos.z));
+                return true;
+            }
         }
 
         return false;

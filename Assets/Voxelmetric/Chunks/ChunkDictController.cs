@@ -12,6 +12,9 @@ public class ChunkDictController : ChunkController {
     [Tooltip("If GetBlock's coordinates are within an unloaded chunk, load the chunk and return the block at the coordinates.")]
     public bool GetBlockCreateMissingChunks;
 
+    public int minChunkY = -32;
+    public int maxChunkY = 64;
+
     public override void Initialize(Voxelmetric vm)
     {
         base.Initialize(vm);
@@ -20,6 +23,8 @@ public class ChunkDictController : ChunkController {
     public override Chunk CreateChunk(Pos pos)
     {
         pos = GetChunkPos(pos);
+        if (pos.y > maxChunkY || pos.y < minChunkY) return null;
+
         Chunk chunk;
 
         if (chunks.ContainsKey(pos))
@@ -76,11 +81,9 @@ public class ChunkDictController : ChunkController {
             {
                 chunk = CreateChunk(blockPos);
             }
-            else // Otherwise return void
-            {
-                return new Block(Block.VoidId);
-            }
         }
+
+        if(chunk == null) return new Block(Block.VoidId);
 
         // Use the chunk's GetBlock function to return the block
         return chunk.GetBlock(blockPos);

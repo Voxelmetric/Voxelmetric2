@@ -57,6 +57,7 @@ public class Chunk : MonoBehaviour {
         AssignMesh(meshData);
 
         meshData.Clear();
+        rendered = true;
     }
 
     /// <summary>
