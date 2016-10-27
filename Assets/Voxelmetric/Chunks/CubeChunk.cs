@@ -59,6 +59,8 @@ public class CubeChunk : Chunk {
     public override void Clear()
     {
         meshData.Clear();
+        if (filter.mesh != null) filter.mesh.Clear();
+        if(col.sharedMesh!=null) col.sharedMesh.Clear();
         blocks = new Block[0,0,0];
         filter.mesh = null;
         rendered = false;
@@ -67,11 +69,19 @@ public class CubeChunk : Chunk {
     public override void Render()
     {
         if (rendering) return;
-
         rendering = true;
-        CreateChunkNeighbors();
 
-        ThreadPool.QueueUserWorkItem(new WaitCallback(CreateChunkMeshDelegate), meshData);
+        if (!rendered)
+        {
+            CreateChunkNeighbors();
+        }
+
+        // Set the rendered flag to true even though the mesh isn't rendered yet because all
+        // the work for it is done and does not need to be called again.
+        rendered = true;
+
+        //ThreadPool.QueueUserWorkItem(new WaitCallback(CreateChunkMeshDelegate), meshData);
+        CreateChunkMesh(meshData);
     }
 
     public override void LateUpdate()
@@ -97,16 +107,11 @@ public class CubeChunk : Chunk {
     {
         Utils.ProfileCall(() =>
         {
-            if (!rendered)
+            // First time this chunk is rendered - make sure that all neighboring
+            // chunks are filled before this chunk can be rendered
+            foreach (var dir in DirectionUtils.Directions)
             {
-                // Fist time this chunk is rendered - make sure that all neighboring
-                // chunks are filled before this chunk can be rendered
-                foreach (var dir in DirectionUtils.Directions)
-                {
-                    chunkController.CreateChunk(pos + (chunkController.chunkSize * (Pos)dir));
-                }
-
-                rendered = true;
+                chunkController.CreateChunk(pos + (chunkController.chunkSize * (Pos)dir));
             }
         }, "Create neighbors");
     }
