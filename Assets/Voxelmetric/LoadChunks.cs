@@ -6,8 +6,6 @@ public class LoadChunks : MonoBehaviour
 {
 
     public Voxelmetric vm;
-    public bool generateTerrain = true;
-    public string layerFolder;
     private Pos objectPos;
 
     [Range(1, 64)]
