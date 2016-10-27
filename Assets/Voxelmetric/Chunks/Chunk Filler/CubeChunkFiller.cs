@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using SimplexNoise;
 
-public class CubeChunkFiller : ChunkFiller {
+public class CubeChunkFiller : ChunkFiller
+{
 
     public string seed;
 
@@ -10,40 +11,15 @@ public class CubeChunkFiller : ChunkFiller {
     private Dictionary<Pos, Block[,,]> stored = new Dictionary<Pos, Block[,,]>();
     private int chunkSize;
 
+    public int minChunkY = -32;
+    public int maxChunkY = 32;
+
     public override void Initialize(Voxelmetric vm)
     {
         base.Initialize(vm);
         noise = new Noise(seed);
-        layers = new TerrainLayer[] {
-            new SimpleLayer() {
-                baseHeight = 20,
-                frequency = 0.01f,
-                amplitude = 16,
-                absolute = true,
-                blockId = vm.components.blockLoader.GetId("rock")
-            },
-            new SimpleLayer() {
-                baseHeight = 0,
-                frequency = 0.1f,
-                amplitude = 6,
-                absolute = false,
-                blockId = vm.components.blockLoader.GetId("rock")
-            },
-            new SimpleLayer() {
-                baseHeight = 20,
-                frequency = 0.05f,
-                amplitude = 2,
-                absolute = true,
-                blockId = vm.components.blockLoader.GetId("dirt")
-            },
-            new SimpleLayer() {
-                baseHeight = 2,
-                frequency = 0.01f,
-                amplitude = 2,
-                absolute = false,
-                blockId = vm.components.blockLoader.GetId("grass")
-            },
-        };
+
+        layers = FindObjectOfType<LayerStore>().GetLayers(vm);
 
         Utils.ProfileCall(() =>
         {
@@ -68,7 +44,7 @@ public class CubeChunkFiller : ChunkFiller {
             return;
         }
 
-        for (pos.y = -48; pos.y <= 64; pos.y += chunk.chunkSize)
+        for (pos.y = minChunkY; pos.y <= maxChunkY; pos.y += chunk.chunkSize)
         {
             stored.Add(pos, new Block[chunk.chunkSize, chunk.chunkSize, chunk.chunkSize]);
         }
@@ -82,7 +58,7 @@ public class CubeChunkFiller : ChunkFiller {
     private void FillChunkColumn(Pos columnPos, int chunkSize)
     {
         Pos pos = columnPos;
-        
+
         for (pos.x = columnPos.x; pos.x < columnPos.x + chunkSize; pos.x++)
         {
             for (pos.z = columnPos.z; pos.z < columnPos.z + chunkSize; pos.z++)
@@ -94,7 +70,7 @@ public class CubeChunkFiller : ChunkFiller {
 
     private void FillColumn(int x, int z)
     {
-        int head = -32;
+        int head = minChunkY;
         foreach (var layer in layers)
         {
             Utils.ProfileCall(() =>
@@ -104,13 +80,21 @@ public class CubeChunkFiller : ChunkFiller {
         }
     }
 
-    //Sets a column of chunks starting at startPlaceHeight and ending at endPlaceHeight using localSetBlock for speed
+    /// <summary>
+    /// Sets a column of chunks starting at startPlaceHeight and ending at endPlaceHeight.
+    /// Usually faster than setting blocks one at a time from the layer.
+    /// </summary>
+    /// <param name="x">Column global x position</param>
+    /// <param name="z">Column global z position</param>
+    /// <param name="startPlaceHeight">First block's global y position</param>
+    /// <param name="endPlaceHeight">Last block's global y position</param>
+    /// <param name="blockToPlace">The block to fill this column with</param>
     public override void SetBlocks(int x, int z, int startPlaceHeight, int endPlaceHeight, Block blockToPlace)
     {
         Pos chunkPos = vm.components.chunks.GetChunkPos(new Pos(x, 0, z));
 
         // Loop through each chunk in the column
-        for (chunkPos.y = -32; chunkPos.y <= 64; chunkPos.y += chunkSize)
+        for (chunkPos.y = minChunkY; chunkPos.y <= maxChunkY; chunkPos.y += chunkSize)
         {
             // And for each one loop through its height
             for (int y = 0; y < chunkSize; y++)
