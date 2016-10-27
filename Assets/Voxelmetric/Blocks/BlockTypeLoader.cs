@@ -79,7 +79,7 @@ public class BlockTypeLoader : MonoBehaviour {
             vm = vm,
             blockName = "void",
             id = Block.VoidId,
-            solid = false,
+            solid = true,
             canBeWalkedOn = false,
             canBeWalkedThrough = true,
         };
