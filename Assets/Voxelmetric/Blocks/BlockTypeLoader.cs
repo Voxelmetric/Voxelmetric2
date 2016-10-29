@@ -25,7 +25,7 @@ public class BlockTypeLoader : MonoBehaviour {
         AddType(AirAttributes());
         AddType(VoidAttributes());
 
-        var typesToLoad = FindObjectOfType<BlockTypesStore>().GetBlockAttrs(vm);
+        var typesToLoad = FindObjectOfType<BlockTypeStore>().GetBlockTypes(vm);
 
         foreach (var attr in typesToLoad)
         {

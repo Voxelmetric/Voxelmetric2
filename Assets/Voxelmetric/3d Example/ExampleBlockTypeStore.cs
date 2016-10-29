@@ -1,9 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class BlockTypesStore : MonoBehaviour
+public class ExampleBlockTypeStore: BlockTypeStore
 {
-    public BlockType[] GetBlockAttrs(Voxelmetric vm)
+    public override BlockType[] GetBlockTypes(Voxelmetric vm)
     {
         return new BlockType[] {
             new CubeBlockType() {
