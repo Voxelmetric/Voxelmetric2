@@ -4,11 +4,11 @@ using System;
 
 public class MutableTextureAtlas : TextureAtlas {
     readonly int _texSize;
-    int currentX;
-    int currentY;
+    int _currentX;
+    int _currentY;
     readonly Vector2 normalisedTexSize;
     readonly Rect atlasRect;
-    Dictionary<string, Rect> textureRects = new Dictionary<string, Rect>();
+    Dictionary<string, Rect> _textureRects = new Dictionary<string, Rect>();
 
     public MutableTextureAtlas(int textureSize, int atlasSize, TextureFormat format)
     {
@@ -23,8 +23,8 @@ public class MutableTextureAtlas : TextureAtlas {
 
     public Rect ReserveSpace(out int xPos, out int yPos)
     {
-        xPos = currentX;
-        yPos = currentY;
+        xPos = _currentX;
+        yPos = _currentY;
         Vector2 uvPoint = Rect.PointToNormalized(atlasRect, new Vector2(xPos, yPos));
         MoveNext();
         return new Rect(uvPoint, normalisedTexSize);
@@ -47,8 +47,8 @@ public class MutableTextureAtlas : TextureAtlas {
         }
         
         Vector2 uvPoint = Rect.PointToNormalized(atlasRect, new Vector2(xPos, yPos));
-        textureRects[tex.name] = new Rect(uvPoint, normalisedTexSize);
-        return textureRects[tex.name];
+        _textureRects[tex.name] = new Rect(uvPoint, normalisedTexSize);
+        return _textureRects[tex.name];
     }
 
     public void Fill(Color color)
@@ -65,13 +65,13 @@ public class MutableTextureAtlas : TextureAtlas {
 
     public Rect AddTexture(Texture2D tex, bool updateTextureImmediate = true)
     {
-        int targetX = currentX;
-        int targetY = currentY;
+        int targetX = _currentX;
+        int targetY = _currentY;
         bool moveNext = true;
-        if(textureRects.ContainsKey(tex.name))
+        if(_textureRects.ContainsKey(tex.name))
         {
-            targetX = (int)textureRects[tex.name].x;
-            targetY = (int)textureRects[tex.name].y;
+            targetX = (int)_textureRects[tex.name].x;
+            targetY = (int)_textureRects[tex.name].y;
             moveNext = false;
         }
         
@@ -86,11 +86,11 @@ public class MutableTextureAtlas : TextureAtlas {
 
     private void MoveNext()
     {
-        currentX += _texSize;
-        if (currentX >= atlasRect.width)
+        _currentX += _texSize;
+        if (_currentX >= atlasRect.width)
         {
-            currentX = 0;
-            currentY += _texSize;
+            _currentX = 0;
+            _currentY += _texSize;
         }
     }
 
@@ -112,17 +112,17 @@ public class MutableTextureAtlas : TextureAtlas {
 
     public override Rect GetTextureRect(string name)
     {
-        if (!textureRects.ContainsKey(name))
+        if (!_textureRects.ContainsKey(name))
         {
             Debug.LogError("There is no loaded texture by the name " + name);
             return new Rect();
         }
 
-        return textureRects[name];
+        return _textureRects[name];
     }
 
     public override List<String> GetTextureNames()
     {
-        return new List<String>(textureRects.Keys);
+        return new List<String>(_textureRects.Keys);
     }
 }
