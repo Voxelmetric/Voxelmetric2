@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System;
 
-public class MutableTextureAtlas : TextureAtlas {
+public class MutableTextureAtlas : TextureAtlas
+{
     readonly int _texSize;
     int _currentX;
     int _currentY;
@@ -45,7 +46,7 @@ public class MutableTextureAtlas : TextureAtlas {
         {
             _texture.Apply();
         }
-        
+
         Vector2 uvPoint = Rect.PointToNormalized(atlasRect, new Vector2(xPos, yPos));
         _textureRects[tex.name] = new Rect(uvPoint, normalisedTexSize);
         return _textureRects[tex.name];
@@ -68,13 +69,13 @@ public class MutableTextureAtlas : TextureAtlas {
         int targetX = _currentX;
         int targetY = _currentY;
         bool moveNext = true;
-        if(_textureRects.ContainsKey(tex.name))
+        if (_textureRects.ContainsKey(tex.name))
         {
             targetX = (int)_textureRects[tex.name].x;
             targetY = (int)_textureRects[tex.name].y;
             moveNext = false;
         }
-        
+
 
         Rect result = AddTexture(tex, targetX, targetY, updateTextureImmediate);
         if (moveNext)

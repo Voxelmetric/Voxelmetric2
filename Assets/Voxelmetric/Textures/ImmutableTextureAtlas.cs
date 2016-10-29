@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System;
 using System.Collections;
 
-public class ImmutableTextureAtlas : TextureAtlas  {
+public class ImmutableTextureAtlas : TextureAtlas
+{
 
     Dictionary<string, Rect> _textureRects = new Dictionary<string, Rect>();
-
 
     public ImmutableTextureAtlas(Texture2D[] textures, int maximumSize)
     {
@@ -25,7 +25,7 @@ public class ImmutableTextureAtlas : TextureAtlas  {
 
     public override Rect GetTextureRect(string name)
     {
-        if(!_textureRects.ContainsKey(name))
+        if (!_textureRects.ContainsKey(name))
         {
             Debug.LogError("There is no loaded texture by the name " + name);
             return new Rect();
