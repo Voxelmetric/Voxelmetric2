@@ -90,6 +90,20 @@ public class ChunkDictController : ChunkController {
 
     }
 
+    public override void SetBlock(Pos blockPos, Block block)
+    {
+        Chunk chunk = GetChunk(blockPos);
+
+        if (chunk != null)
+        {
+            chunk.SetBlock(block, blockPos);
+        }
+        else if(SetBlockCreateMissingChunks)
+        {
+            CreateChunk(blockPos).SetBlock(block, blockPos);
+        }
+    }
+
     public override List<Chunk> GetChunks()
     {
         return new List<Chunk>(chunks.Values);
