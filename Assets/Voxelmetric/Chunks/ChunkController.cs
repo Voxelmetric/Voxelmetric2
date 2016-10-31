@@ -98,11 +98,11 @@ public abstract class ChunkController : MonoBehaviour {
 
     public virtual void Deserialize(byte[] data) { }
 
-    public void ClearAllStaleBlocks()
+    public void ClearAllUnsavedBlocks()
     {
         foreach (var chunk in GetChunks())
         {
-            chunk.ClearStaleBlocks();
+            chunk.ClearUnsavedBlocks();
         }
     }
 }
