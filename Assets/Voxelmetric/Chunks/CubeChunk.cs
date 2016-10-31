@@ -1,56 +1,38 @@
 ﻿using UnityEngine;
 using System;
 using System.Threading;
+using System.Collections.Generic;
 
 public class CubeChunk : Chunk {
 
     public Block[,,] blocks;
 
-    protected MeshFilter filter;
-    protected MeshCollider col;
+    protected MeshFilter _filter;
+    protected MeshCollider _col;
 
-    protected bool rendering;
-    protected bool meshDataReady;
+    protected bool _rendering;
+    protected bool _meshDataReady;
 
     public override void VmStart(Pos position, ChunkController chunkController)
     {
-        Utils.ProfileCall(() =>
-        {
-            pos = position;
-            transform.position = pos;
-        }, "Set position");
-
+        pos = position;
+        transform.position = position;
         this.chunkController = chunkController;
-        Utils.ProfileCall(() =>
-        {
-            blocks = new Block[chunkSize, chunkSize, chunkSize];
-        }, "Create blocks array");
+        vm = chunkController.vm;
 
-        Utils.ProfileCall(() =>
-        {
-            chunkController.vm.components.chunkFiller.FillChunk(this);
-        }, "Fill Chunk");
+        blocks = new Block[chunkSize, chunkSize, chunkSize];
+        vm.components.chunkFiller.FillChunk(this);
 
-        Utils.ProfileCall(() =>
+        if (_filter == null)
         {
-            if (filter == null)
-            {
-                col = gameObject.AddComponent<MeshCollider>();
-                filter = gameObject.AddComponent<MeshFilter>();
-                var renderer = gameObject.AddComponent<MeshRenderer>();
-                renderer.material = chunkController.vm.components.textureLoader.material;
-            }
-        }, "Adding components");
+            _col = gameObject.AddComponent<MeshCollider>();
+            _filter = gameObject.AddComponent<MeshFilter>();
+            var renderer = gameObject.AddComponent<MeshRenderer>();
+            renderer.material = chunkController.vm.components.textureLoader.material;
+        }
 
-        Utils.ProfileCall(() =>
-        {
-            transform.parent = chunkController.transform;
-        }, "Setting parent");
-
-        Utils.ProfileCall(() =>
-        {
-            gameObject.SetActive(true);
-        }, "Activating game object");
+        transform.parent = chunkController.transform;
+        gameObject.SetActive(true);
     }
 
     /// <summary>
@@ -58,18 +40,43 @@ public class CubeChunk : Chunk {
     /// </summary>
     public override void Clear()
     {
-        meshData.Clear();
-        if (filter.mesh != null) filter.mesh.Clear();
-        if(col.sharedMesh!=null) col.sharedMesh.Clear();
+        base.Clear();
+
+        if (_filter.mesh != null) _filter.mesh.Clear();
+        if(_col.sharedMesh!=null) _col.sharedMesh.Clear();
         blocks = new Block[0,0,0];
-        filter.mesh = null;
-        rendered = false;
     }
 
+    public override void LateUpdate()
+    {
+        if (renderStale)
+        {
+            Render();
+        }
+
+        if (_meshDataReady && vm.settings.threading)
+        {
+            Utils.ProfileCall(() =>
+            {
+                AssignMesh(_meshData);
+            }, "Assign mesh");
+
+            Utils.ProfileCall(() =>
+            {
+                _meshData.Clear();
+            }, "Clear mesh");
+
+            _rendering = false;
+            _meshDataReady = false;
+        }
+    }
+
+    #region Mesh create and render
     public override void Render()
     {
-        if (rendering) return;
-        rendering = true;
+        if (_rendering) return;
+        _rendering = true;
+        renderStale = false;
 
         if (!rendered)
         {
@@ -80,26 +87,18 @@ public class CubeChunk : Chunk {
         // the work for it is done and does not need to be called again.
         rendered = true;
 
-        //ThreadPool.QueueUserWorkItem(new WaitCallback(CreateChunkMeshDelegate), meshData);
-        CreateChunkMesh(meshData);
-    }
-
-    public override void LateUpdate()
-    {
-        if (meshDataReady)
+        if (vm.settings.threading)
         {
-            Utils.ProfileCall(() =>
-            {
-                AssignMesh(meshData);
-            }, "Assign mesh");
+            ThreadPool.QueueUserWorkItem(new WaitCallback(CreateChunkMeshDelegate), _meshData);
+        }
+        else
+        {
+            CreateChunkMesh(_meshData);
+            AssignMesh(_meshData);
 
-            Utils.ProfileCall(() =>
-            {
-                meshData.Clear();
-            }, "Clear mesh");
-
-            rendering = false;
-            meshDataReady = false;
+            _meshData.Clear();
+            _rendering = false;
+            _meshDataReady = false;
         }
     }
 
@@ -139,10 +138,9 @@ public class CubeChunk : Chunk {
                     }
                 }
             }
-
-            meshDataReady = true;
         }
 
+        _meshDataReady = true;
     }
 
     /// <summary>
@@ -156,20 +154,20 @@ public class CubeChunk : Chunk {
         mesh.triangles = meshData.tris.ToArray();
         mesh.uv = meshData.uvs.ToArray();
 
-        filter.mesh = mesh;
+        _filter.mesh = mesh;
 
         mesh = new Mesh();
         mesh.name = "Collision mesh for " + name;
-        //mesh.vertices = meshData.colVerts.ToArray();
-        //mesh.triangles = meshData.colTris.ToArray();
         mesh.vertices = meshData.verts.ToArray();
         mesh.triangles = meshData.tris.ToArray();
 
-        col.sharedMesh = mesh;
+        _col.sharedMesh = mesh;
 
         meshData.Clear();
     }
+    #endregion
 
+    #region Get, Set blocks
     /// <summary>
     /// Returns the block at the specified position
     /// </summary>
@@ -189,13 +187,7 @@ public class CubeChunk : Chunk {
         ];
     }
 
-    /// <summary>
-    /// Replaces the block at the given location with the newBlock
-    /// </summary>
-    /// <param name="newBlock">The block to place at the target location</param>
-    /// <param name="pos">position to place the new block</param>
-    /// <returns>Returns the block that was replaced</returns>
-    public override Block SetBlock(Block newBlock, Pos blockPos)
+    public override Block SetBlock(Block newBlock, Pos blockPos, bool updateRender = true)
     {
         Block oldBlock = GetBlock(pos);
         oldBlock.GetBlockType(chunkController.vm).OnDestroy(this, pos, oldBlock, 0);
@@ -204,8 +196,19 @@ public class CubeChunk : Chunk {
             blockPos.x - pos.x,
             blockPos.y - pos.y,
             blockPos.z - pos.z
-        ] = newBlock.GetBlockType(chunkController.vm).OnCreate(this, pos, newBlock); ;
+        ] = newBlock.GetBlockType(chunkController.vm).OnCreate(this, pos, newBlock);
+
+        if (updateRender) RenderSoon();
 
         return oldBlock;
     }
+    #endregion
+
+    #region Save and load
+    public override void AddUnsavedBlock(Pos pos){ }
+    public override void ClearUnsavedBlocks(){ }
+    public override bool HasUnsavedBlocks(){ throw new NotImplementedException(); }
+    public override void DeserializeChunk(List<byte> data){ }
+    public override List<byte> SerializeChunk(byte storeMode){ throw new NotImplementedException(); } 
+    #endregion
 }

@@ -1,44 +1,53 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-// TODO: need to implement logic around reloading mesh and initial mesh load
+public abstract class Chunk : MonoBehaviour {
 
-public class Chunk : MonoBehaviour {
-
-    public Pos pos;
-    [HideInInspector]
-    public ChunkController chunkController;
+    public Pos pos { get; protected set; }
+    public ChunkController chunkController { get; protected set; }
+    public Voxelmetric vm { get; protected set; }
 
     public int   chunkSize { get { return chunkController.chunkSize; } }
     public float blockSize { get { return chunkController.blockSize; } }
-    public bool rendered = false;
 
-    protected MeshData meshData = new MeshData();
+    protected MeshData _meshData = new MeshData();
 
-    bool _chunkIsFilled = false;
+    /// <summary>
+    /// True if the chunk has been rendered for the first time
+    /// </summary>
+    public bool rendered { get; protected set; }
+    /// <summary>
+    /// True if the contents of the chunk have been modified since last render
+    /// </summary>
+    public bool renderStale { get; protected set; }
     /// <summary>
     /// Used to determine if the chunk has been populated by the chunk filler
-    /// Some implementations may need this value to know if all neighboring
-    /// chunks are filled before rendering
     /// </summary>
-    public virtual bool chunkIsFilled {
-        get { return _chunkIsFilled; }
-        set { _chunkIsFilled = value; }
-    }
+    public bool chunkIsFilled;
 
+    /// <summary>
+    /// Should initialize all the chunk's variables and fill it if necessary
+    /// Keep in mind this could be a new game object or an old one returned
+    /// from an object pool.
+    /// </summary>
     public virtual void VmStart(Pos position, ChunkController chunkController)
     {
         pos = position;
+        transform.position = position;
+
         this.chunkController = chunkController;
+        vm = chunkController.vm;
 
-        chunkController.vm.components.chunkFiller.FillChunk(this);
-
+        vm.components.chunkFiller.FillChunk(this);
         gameObject.SetActive(true);
     }
 
     public virtual void LateUpdate()
     {
-
+        if (renderStale)
+        {
+            Render();
+        }
     }
 
     /// <summary>
@@ -46,6 +55,11 @@ public class Chunk : MonoBehaviour {
     /// </summary>
     public virtual void Clear()
     {
+        rendered = false;
+        renderStale = false;
+        chunkIsFilled = false;
+        _meshData.Clear();
+        ClearUnsavedBlocks();
     }
 
     /// <summary>
@@ -53,69 +67,51 @@ public class Chunk : MonoBehaviour {
     /// </summary>
     public virtual void Render()
     {
-        CreateChunkMesh(meshData);
-        AssignMesh(meshData);
+        renderStale = false;
+        CreateChunkMesh(_meshData);
+        AssignMesh(_meshData);
 
-        meshData.Clear();
+        _meshData.Clear();
         rendered = true;
     }
 
     /// <summary>
-    /// Regenerates the chunks mesh from the blocks it contains and assigns the mesh to
-    /// be rendered.
+    /// Flags the chunk for a render soon
     /// </summary>
-    public virtual void UpdateChunk()
+    public virtual void RenderSoon()
     {
-        Render();
+        renderStale = true;
     }
 
     /// <summary>
     /// Creates a chunk mesh from the blocks the mesh contains. The mesh should use the
     /// chunk's position as it's origin point.
     /// </summary>
-    protected virtual void CreateChunkMesh(MeshData meshData)
-    {
-    }
+    protected abstract void CreateChunkMesh(MeshData meshData);
 
     /// <summary>
     /// Takes the mesh data passed to it and assigns it to the chunks renderer replacing the original contents
     /// </summary>
-    protected virtual void AssignMesh(MeshData meshData)
-    {
-    }
+    protected abstract void AssignMesh(MeshData meshData);
 
     /// <summary>
     /// Returns the block at the specified position
     /// </summary>
-    public virtual Block GetBlock(Pos pos)
-    {
-        return new Block();
-    }
+    public abstract Block GetBlock(Pos pos);
 
     /// <summary>
-    /// Replaces the block at the given location with the newBlock
+    /// Replaces the block at the given location with the newBlock, should call OnCreate for the block created and
+    /// OnDestroy for the block destroyed and if updateRender is true, should initialize a re-render of the chunk
     /// </summary>
     /// <param name="newBlock">The block to place at the target location</param>
     /// <param name="pos">position to place the new block</param>
     /// <returns>Returns the block that was replaced</returns>
-    public virtual Block SetBlock(Block newBlock, Pos pos)
-    {
-        newBlock.GetBlockType(chunkController.vm).OnCreate(this, pos, newBlock);
+    public abstract Block SetBlock(Block newBlock, Pos pos, bool updateRender = true);
 
-        return GetBlock(pos);
-    }
+    public abstract List<byte> SerializeChunk(byte storeMode);
+    public abstract void DeserializeChunk(List<byte> data);
 
-    public virtual List<byte> SerializeChunk(byte storeMode)
-    {
-        return new List<byte>();
-    }
-
-    public virtual void DeserializeChunk(List<byte> data) { }
-    public virtual void ClearStaleBlocks() { }
-    public virtual void AddStaleBlock(Pos pos) { }
-
-    public virtual bool HasStaleBlocks()
-    {
-        return false;
-    }
+    public abstract void ClearUnsavedBlocks();
+    public abstract void AddUnsavedBlock(Pos pos);
+    public abstract bool HasUnsavedBlocks();
 }
