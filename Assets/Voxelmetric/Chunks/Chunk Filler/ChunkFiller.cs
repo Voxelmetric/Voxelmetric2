@@ -18,7 +18,7 @@ public class ChunkFiller : MonoBehaviour {
         chunk.chunkIsFilled = true;
     }
 
-    public virtual void SetBlocks(int x, int z, int startPlaceHeight, int endPlaceHeight, Block blockToPlace)
+    public virtual void SetBlocks(int x, int z, int startPlaceHeight, int endPlaceHeight, int blockId)
     {
 
     }

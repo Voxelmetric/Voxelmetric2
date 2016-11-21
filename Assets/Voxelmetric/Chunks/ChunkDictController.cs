@@ -81,9 +81,11 @@ public class ChunkDictController : ChunkController {
             {
                 chunk = CreateChunk(blockPos);
             }
+            else
+            {
+                return vm.components.blockLoader.CreateBlock(Block.VoidId);
+            }
         }
-
-        if(chunk == null) return new Block(Block.VoidId);
 
         // Use the chunk's GetBlock function to return the block
         return chunk.GetBlock(blockPos);

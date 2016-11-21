@@ -22,7 +22,7 @@ public class SimpleLayer : TerrainLayer {
 
         Utils.ProfileCall(() =>
         {
-            filler.SetBlocks(x, z, head, top, new Block(blockId));
+            filler.SetBlocks(x, z, head, top, blockId);
         }, "Set Blocks");
         return top;
     }

@@ -89,7 +89,7 @@ public class CubeChunkFiller : ChunkFiller
     /// <param name="startPlaceHeight">First block's global y position</param>
     /// <param name="endPlaceHeight">Last block's global y position</param>
     /// <param name="blockToPlace">The block to fill this column with</param>
-    public override void SetBlocks(int x, int z, int startPlaceHeight, int endPlaceHeight, Block blockToPlace)
+    public override void SetBlocks(int x, int z, int startPlaceHeight, int endPlaceHeight, int blockId)
     {
         Pos chunkPos = vm.components.chunks.GetChunkPos(new Pos(x, 0, z));
 
@@ -107,7 +107,7 @@ public class CubeChunkFiller : ChunkFiller
                     if (chunkPos.y + y < endPlaceHeight)
                     {
                         //chunks[i].world.SetBlock(new BlockPos(x, y + chunks[i].pos.y, z), blockToPlace, false, false);
-                        stored[chunkPos][x - chunkPos.x, y, z - chunkPos.z] = blockToPlace;
+                        stored[chunkPos][x - chunkPos.x, y, z - chunkPos.z] = vm.components.blockLoader.CreateBlock(blockId);
                     }
                     else
                     {

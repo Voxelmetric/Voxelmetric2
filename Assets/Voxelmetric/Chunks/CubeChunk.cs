@@ -16,7 +16,8 @@ public class CubeChunk : Chunk {
     public override void VmStart(Pos position, ChunkController chunkController)
     {
         pos = position;
-        transform.position = position;
+        transform.parent = chunkController.transform;
+        transform.localPosition = position;
         this.chunkController = chunkController;
         vm = chunkController.vm;
 
@@ -31,7 +32,6 @@ public class CubeChunk : Chunk {
             renderer.material = chunkController.vm.components.textureLoader.material;
         }
 
-        transform.parent = chunkController.transform;
         gameObject.SetActive(true);
     }
 
@@ -77,6 +77,8 @@ public class CubeChunk : Chunk {
         if (_rendering) return;
         _rendering = true;
         renderStale = false;
+
+        if (transform.localPosition != (Vector3)pos) transform.localPosition = pos;
 
         if (!rendered)
         {
@@ -134,7 +136,8 @@ public class CubeChunk : Chunk {
                 {
                     for (int z = 0; z < blocks.GetLength(2); z++)
                     {
-                        blocks[x, y, z].GetBlockType(chunkController.vm).Render(this, new Pos(x, y, z) + pos, blocks[x, y, z], meshData);
+                        if(blocks[x,y,z] !=null)
+                        blocks[x, y, z].Render(this, new Pos(x, y, z) + pos, blocks[x, y, z], meshData);
                     }
                 }
             }
@@ -180,23 +183,28 @@ public class CubeChunk : Chunk {
             return chunkController.GetBlock(blockPos);
         }
 
-        return blocks[
+        Block block = blocks[
             blockPos.x - pos.x,
             blockPos.y - pos.y,
             blockPos.z - pos.z
         ];
+
+        if (block != null) return block;
+        else return vm.components.blockLoader.CreateBlock(Block.AirId);
     }
 
     public override Block SetBlock(Block newBlock, Pos blockPos, bool updateRender = true)
     {
-        Block oldBlock = GetBlock(pos);
-        oldBlock.GetBlockType(chunkController.vm).OnDestroy(this, pos, oldBlock, 0);
+        Block oldBlock = GetBlock(blockPos);
+        oldBlock.OnDestroy(this, blockPos, 0);
 
         blocks[
             blockPos.x - pos.x,
             blockPos.y - pos.y,
             blockPos.z - pos.z
-        ] = newBlock.GetBlockType(chunkController.vm).OnCreate(this, pos, newBlock);
+        ] = newBlock;
+
+        newBlock.OnCreate(this, blockPos);
 
         if (updateRender) RenderSoon();
 

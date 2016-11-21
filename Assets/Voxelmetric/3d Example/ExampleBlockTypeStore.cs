@@ -1,42 +1,42 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class ExampleBlockTypeStore: BlockTypeStore
+public class ExampleBlockTypeStore: BlockAttributeStore
 {
-    public override BlockType[] GetBlockTypes(Voxelmetric vm)
+    public override BlockAttributes[] GetBlockAttributes(Voxelmetric vm)
     {
-        return new BlockType[] {
-            new CubeBlockType() {
+        return new BlockAttributes[] {
+            new BlockAttributes() {
                 blockName = "rock",
                 id = 2,
-                solid = true,
-                canBeWalkedOn = true,
-                canBeWalkedThrough = false,
-                textureName = "rock",
+                isSolid = true,
+                isStatic = true,
+                textureSet = vm.components.textureLoader.GetByName("rock"),
+                blockType = typeof(CubeBlockType)
             },
-            new CubeBlockType() {
+            new BlockAttributes() {
                 blockName = "dirt",
                 id = 3,
-                solid = true,
-                canBeWalkedOn = false,
-                canBeWalkedThrough = false,
-                textureName = "dirt",
+                isSolid = true,
+                isStatic = true,
+                textureSet = vm.components.textureLoader.GetByName("dirt"),
+                blockType = typeof(CubeBlockType)
             },
-            new CubeBlockType() {
+            new BlockAttributes() {
                 blockName = "grass",
                 id = 4,
-                solid = true,
-                canBeWalkedOn = true,
-                canBeWalkedThrough = true,
-                textureName = "grass",
+                isSolid = true,
+                isStatic = true,
+                textureSet = vm.components.textureLoader.GetByName("grass"),
+                blockType = typeof(CubeBlockType)
             },
-            new CubeBlockType() {
+            new BlockAttributes() {
                 blockName = "sand",
                 id = 5,
-                solid = true,
-                canBeWalkedOn = true,
-                canBeWalkedThrough = true,
-                textureName = "sand",
+                isSolid = true,
+                isStatic = true,
+                textureSet = vm.components.textureLoader.GetByName("sand"),
+                blockType = typeof(CubeBlockType)
             }
         };
     }
